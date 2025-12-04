@@ -12,6 +12,10 @@ from litellm import completion
 
 logger = logging.getLogger(__name__)
 
+# Constants for article extraction
+MAX_TEXT_LENGTH = 5000  # Maximum characters to send to LLM for analysis
+MAX_RAW_TEXT_STORAGE = 2000  # Maximum characters to store in raw text field
+
 
 class NewsGathererSchema(BaseModel):
     query: str = Field(description="Search query for news articles")
@@ -157,7 +161,7 @@ class ArticleExtractor(BaseTool):
             prompt = f"""You are an expert content analyzer. Analyze this webpage from {url}.
 
 Raw webpage text:
-{text[:5000]}
+{text[:MAX_TEXT_LENGTH]}
 
 Please provide:
 1. Main Article Content Summary
@@ -177,7 +181,7 @@ Please provide:
             return {
                 'success': True,
                 'content': {
-                    'raw_text': text[:2000],
+                    'raw_text': text[:MAX_RAW_TEXT_STORAGE],
                     'processed_content': response.choices[0].message.content,
                     'url': url,
                     'extracted_at': datetime.now().isoformat()

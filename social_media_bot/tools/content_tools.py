@@ -12,6 +12,12 @@ from pydantic import BaseModel, Field, validator
 
 logger = logging.getLogger(__name__)
 
+# Constants for engagement prediction
+DEFAULT_ENGAGEMENT_SCORE = 0.75
+HIGH_ENGAGEMENT_SCORE = 0.9
+LOW_ENGAGEMENT_SCORE = 0.4
+PREDICTION_CONFIDENCE = 0.8
+
 
 class ContentGeneratorSchema(BaseModel):
     digest: Dict[str, Any] = Field(description="Content digest containing the content to generate from")
@@ -313,11 +319,11 @@ class EngagementPredictor(BaseTool):
             
             analysis = response.choices[0].message.content
             
-            engagement_score = 0.75
+            engagement_score = DEFAULT_ENGAGEMENT_SCORE
             if 'high engagement' in analysis.lower():
-                engagement_score = 0.9
+                engagement_score = HIGH_ENGAGEMENT_SCORE
             elif 'low engagement' in analysis.lower():
-                engagement_score = 0.4
+                engagement_score = LOW_ENGAGEMENT_SCORE
             
             return {
                 'success': True,
@@ -325,7 +331,7 @@ class EngagementPredictor(BaseTool):
                     'engagement_score': engagement_score,
                     'analysis': analysis,
                     'factors': [factor.strip() for factor in analysis.split('\n') if factor.strip()],
-                    'confidence': 0.8
+                    'confidence': PREDICTION_CONFIDENCE
                 },
                 'metadata': {
                     'platform': platform,

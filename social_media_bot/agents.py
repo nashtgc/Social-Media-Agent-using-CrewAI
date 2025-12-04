@@ -130,10 +130,12 @@ def create_posting_agent() -> Agent:
     """
     Creates a sophisticated social media posting agent with comprehensive knowledge
     of multiple platforms and content optimization strategies.
+    
+    Note: The DatabaseManager is passed to LinkedIn tools to enable post history tracking.
+    This provides the necessary interface for create_post() and update_post_status() methods.
     """
     
     db_manager = DatabaseManager()
-    db_session = db_manager.session
     
     platform_requirements = {
         'twitter': {

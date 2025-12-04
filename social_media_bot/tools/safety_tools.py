@@ -7,6 +7,18 @@ from litellm import completion
 
 logger = logging.getLogger(__name__)
 
+# Rate limit configurations - can be overridden by environment variables
+RATE_LIMITS = {
+    'twitter': {
+        'posts_per_hour': int(os.getenv('TWITTER_POSTS_PER_HOUR', '5')),
+        'min_interval': int(os.getenv('TWITTER_MIN_INTERVAL', '720'))  # 12 minutes
+    },
+    'linkedin': {
+        'posts_per_hour': int(os.getenv('LINKEDIN_POSTS_PER_HOUR', '3')),
+        'min_interval': int(os.getenv('LINKEDIN_MIN_INTERVAL', '1200'))  # 20 minutes
+    }
+}
+
 
 class SafetyChecker(BaseTool):
     name: str = "Check content safety"
@@ -132,12 +144,7 @@ class RateLimiter(BaseTool):
 
     def _run(self, platform: str, last_post_time: Optional[str] = None) -> Dict:
         try:
-            rate_limits = {
-                'twitter': {'posts_per_hour': 5, 'min_interval': 720},
-                'linkedin': {'posts_per_hour': 3, 'min_interval': 1200},
-            }
-            
-            limits = rate_limits.get(platform.lower(), {'posts_per_hour': 1, 'min_interval': 3600})
+            limits = RATE_LIMITS.get(platform.lower(), {'posts_per_hour': 1, 'min_interval': 3600})
             
             if last_post_time:
                 last_post = datetime.fromisoformat(last_post_time)

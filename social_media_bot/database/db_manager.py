@@ -11,6 +11,12 @@ import json
 
 logger = logging.getLogger(__name__)
 
+# SQLite configuration constants
+SQLITE_FOREIGN_KEYS_ENABLED = True
+SQLITE_JOURNAL_MODE = 'WAL'  # Write-Ahead Logging for better concurrency
+SQLITE_SYNCHRONOUS = 'NORMAL'  # Balance between safety and performance
+SQLITE_CACHE_SIZE = -2000  # 2MB cache (negative = KB)
+
 
 class DatabaseManager:
     """Manager class for database operations"""
@@ -110,11 +116,12 @@ class DatabaseManager:
             )
             self.session = session_factory()
             
-            # Enable foreign key support and WAL mode
-            self.session.execute(text('PRAGMA foreign_keys = ON'))
-            self.session.execute(text('PRAGMA journal_mode = WAL'))
-            self.session.execute(text('PRAGMA synchronous = NORMAL'))
-            self.session.execute(text('PRAGMA cache_size = -2000'))
+            # Enable SQLite optimizations using configuration constants
+            if SQLITE_FOREIGN_KEYS_ENABLED:
+                self.session.execute(text('PRAGMA foreign_keys = ON'))
+            self.session.execute(text(f'PRAGMA journal_mode = {SQLITE_JOURNAL_MODE}'))
+            self.session.execute(text(f'PRAGMA synchronous = {SQLITE_SYNCHRONOUS}'))
+            self.session.execute(text(f'PRAGMA cache_size = {SQLITE_CACHE_SIZE}'))
             self.session.commit()
             
             # Create indexes
